@@ -24,7 +24,7 @@ public partial class MainWindow : Window
     {
         if (DataContext is PlayerViewModel vm)
         {
-            vm.SeekToCurrentPosition();
+            vm.SeekToCurrentPosition.Execute(null);
         }
     }
 
@@ -32,7 +32,7 @@ public partial class MainWindow : Window
     {
         if (DataContext is PlayerViewModel vm)
         {
-            vm.SetVolume();
+            vm.SetVolume.Execute(null);
         }
     }
 
