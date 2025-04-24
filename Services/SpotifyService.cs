@@ -8,7 +8,7 @@ namespace SpotControl.Services
     /// <summary>
     /// Service for handling Spotify authentication and playback control.
     /// </summary>
-    public class SpotifyService
+    public class SpotifyService : MediaController
     {
         private SpotifyClient? _spotify;
         public bool IsAuthenticated => _spotify != null;
@@ -72,7 +72,7 @@ namespace SpotControl.Services
         }
 
 
-        public async Task PlayPauseAsync()
+        public override async Task PlayPauseAsync()
         {
             if (_spotify == null)
                 return;
@@ -88,8 +88,8 @@ namespace SpotControl.Services
 
         // Handle Volume Interactions
         public async Task SetVolume(int volumePercent) => await _spotify?.Player.SetVolume(new PlayerVolumeRequest(volumePercent));
-        public async Task NextTrackAsync() => await _spotify?.Player.SkipNext()!;
-        public async Task PreviousTrackAsync() => await _spotify?.Player.SkipPrevious()!;
+        public override async Task NextTrackAsync() => await _spotify?.Player.SkipNext()!;
+        public override async Task PreviousTrackAsync() => await _spotify?.Player.SkipPrevious()!;
         public async Task SeekAsync(int positionMs) => await _spotify?.Player.SeekTo(new PlayerSeekToRequest(positionMs))!;
         public async Task<CurrentlyPlayingContext?> GetPlaybackInfoAsync()
     => await _spotify?.Player.GetCurrentPlayback();

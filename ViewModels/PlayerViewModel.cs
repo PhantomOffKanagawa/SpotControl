@@ -8,7 +8,7 @@ using SpotifyAPI.Web;
 
 namespace SpotControl.ViewModels
 {
-    public class PlayerViewModel : INotifyPropertyChanged
+    public class PlayerViewModel : BaseViewModel
     {
         private Timer _updateTimer;
         private Timer _seekTimer;
@@ -200,11 +200,6 @@ namespace SpotControl.ViewModels
             _ctsUpdates?.Cancel();
             _ctsSeeking?.Cancel();
         }
-
-
-        public event PropertyChangedEventHandler? PropertyChanged; // Marked nullable to avoid warning  
-        private void OnPropertyChanged([CallerMemberName] string name = "") =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 
 }
