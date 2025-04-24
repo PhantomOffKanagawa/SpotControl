@@ -35,4 +35,12 @@ public partial class MainWindow : Window
             vm.SetVolume();
         }
     }
+
+    private void OnWindowclose(object sender, EventArgs e)
+    {
+        if (DataContext is PlayerViewModel vm)
+        {
+            vm.StopBackgroundPolling();
+        }
+    }
 }

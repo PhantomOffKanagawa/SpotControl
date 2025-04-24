@@ -15,17 +15,24 @@ namespace SpotControl.Views
 
         private async void LoginButton_Click(object sender, RoutedEventArgs e)
         {
-            bool success = await _spotifyService.AuthenticateAsync();
+            try
+            {
+                bool success = await _spotifyService.AuthenticateAsync();
 
-            if (success)
-            {
-                var mainWindow = new MainWindow(_spotifyService);
-                mainWindow.Show();
-                this.Close();
+                if (success)
+                {
+                    var mainWindow = new MainWindow(_spotifyService);
+                    mainWindow.Show();
+                    this.Close();
+                }
+                else
+                {
+                    MessageBox.Show("Authentication failed. Please try again.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Authentication failed. Please try again.");
+                MessageBox.Show($"An error occurred: {ex.Message}");
             }
         }
 

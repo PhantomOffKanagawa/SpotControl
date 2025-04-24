@@ -13,7 +13,7 @@ namespace SpotControl.ViewModels
         private Timer _updateTimer;
         private Timer _seekTimer;
         private const int GENERAL_UPDATE_MS = 3000;
-        private const int UPDATE_SEEK_MS = 50;
+        private const int UPDATE_SEEK_MS = 100;
         private readonly SpotifyService _spotifyService;
 
         public PlayerViewModel(SpotifyService spotifyService)
@@ -22,11 +22,8 @@ namespace SpotControl.ViewModels
             TrackName = string.Empty; // Initialize to avoid nullability warnings  
             ArtistName = string.Empty; // Initialize to avoid nullability warnings  
 
-            // General attribute update
-            _updateTimer = new Timer(async _ => await UpdateTrackInfoAsync(), null, 0, GENERAL_UPDATE_MS); // 3s
-
-            // Smooth Track Progress
-            _seekTimer = new Timer(_ => smoothMove(), null, 0, UPDATE_SEEK_MS); // 100ms
+            // Start threaded polling
+            StartBackgroundPolling();
         }
 
         /* Handle Track Name and Artist Name */
@@ -60,7 +57,7 @@ namespace SpotControl.ViewModels
             await _spotifyService.SeekAsync((int)(TrackProgress / 100 * _trackDurationMs));
         }
 
-        // Make 
+        // Make the slider move even when not actively updated
         private void smoothMove()
         {
             if (_trackDurationMs != 0 && Playing)
@@ -75,7 +72,6 @@ namespace SpotControl.ViewModels
                 OnPropertyChanged(nameof(TrackProgress));
             }
         }
-           
 
         /* Handle Album Art */
         private string _albumImageUrl;
@@ -169,6 +165,40 @@ namespace SpotControl.ViewModels
             RepeatState = playback?.RepeatState ?? "off";
             OnPropertyChanged(nameof(IsShuffle));
             OnPropertyChanged(nameof(RepeatState));
+        }
+
+        // Spin off Updates into Polling Thread
+
+        private CancellationTokenSource _ctsUpdates;
+        private CancellationTokenSource _ctsSeeking;
+
+        public void StartBackgroundPolling()
+        {
+            _ctsUpdates = new CancellationTokenSource();
+            Task.Run(async () =>
+            {
+                while (!_ctsUpdates.Token.IsCancellationRequested)
+                {
+                    await UpdateTrackInfoAsync();
+                    await Task.Delay(GENERAL_UPDATE_MS, _ctsUpdates.Token);
+                }
+            }, _ctsUpdates.Token);
+
+            _ctsSeeking = new CancellationTokenSource();
+            Task.Run(async () =>
+            {
+                while (!_ctsSeeking.Token.IsCancellationRequested)
+                {
+                    smoothMove();
+                    await Task.Delay(UPDATE_SEEK_MS, _ctsSeeking.Token);
+                }
+            }, _ctsSeeking.Token);
+        }
+
+        public void StopBackgroundPolling()
+        {
+            _ctsUpdates?.Cancel();
+            _ctsSeeking?.Cancel();
         }
 
 
