@@ -9,17 +9,18 @@ public partial class MainWindow : Window
     public MainWindow(SpotifyService spotifyService)
     {
         InitializeComponent();
+        // Set the DataContext to the PlayerViewModel
         DataContext = new PlayerViewModel(spotifyService);
         Loaded += async (_, _) =>
         {
+            // On Load Add Event Handlers
             await ((PlayerViewModel)DataContext).UpdateTrackInfoAsync();
 
         };
-
-
-
     }
 
+    // Event Handlers
+    // When Progress Slider Done Update Seek
     private void ProgressSlider_PreviewMouseUp(object sender, MouseButtonEventArgs e)
     {
         if (DataContext is PlayerViewModel vm)
@@ -28,6 +29,7 @@ public partial class MainWindow : Window
         }
     }
 
+    // When Volume Slider Done Update Volume
     private void VolumeSlider_PreviewMouseUp(object sender, MouseButtonEventArgs e)
     {
         if (DataContext is PlayerViewModel vm)
@@ -36,6 +38,7 @@ public partial class MainWindow : Window
         }
     }
 
+    // When Window is Closed Handle Thread Close
     private void OnWindowclose(object sender, EventArgs e)
     {
         if (DataContext is PlayerViewModel vm)

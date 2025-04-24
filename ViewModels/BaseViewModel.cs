@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace SpotControl.ViewModels
 {
+    // Abstract That Implements INotifyPropertyChanged
     public abstract class BaseViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged;

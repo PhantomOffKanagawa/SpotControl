@@ -1,13 +1,61 @@
 ﻿<Window x:Class="SpotControl.Views.LoginWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Login to Spotify" Height="200" Width="400"
-        WindowStartupLocation="CenterScreen">
-    <Grid>
-        <Button Content="Login to Spotify"
+        Title="Login to Spotify"
+        Height="225"
+        Width="400"
+        WindowStartupLocation="CenterScreen"
+        Background="#191414"
+        Foreground="White"
+        FontFamily="Segoe UI"
+        FontSize="14"
+        ResizeMode="NoResize">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Client ID -->
+        <TextBlock Text="Client ID:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="0 0 10 10"/>
+        <TextBox x:Name="ClientIdBox" Grid.Row="0" Grid.Column="1" Margin="0 0 0 10" 
+                 Background="#121212" Foreground="White" BorderBrush="#1DB954"/>
+
+        <!-- Client Secret -->
+        <TextBlock Text="Client Secret:" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="0 0 10 10"/>
+        <PasswordBox x:Name="ClientSecretBox" Grid.Row="1" Grid.Column="1" Margin="0 0 0 10"
+                     Background="#121212" Foreground="White" BorderBrush="#1DB954"/>
+
+        <!-- Remember Me -->
+        <CheckBox Grid.Row="2" Grid.ColumnSpan="2" Content="Remember me"
+                  x:Name="RememberCheck" Foreground="White" Margin="0 0 0 10"/>
+
+        <!-- Login Button -->
+        <Button Grid.Row="3" Grid.ColumnSpan="2"
+                Content="Login to Spotify"
+                Click="LoginButton_Click"
+                Background="#1DB954"
+                Foreground="Black"
+                FontWeight="Bold"
+                Padding="8"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Padding="10"
-                Click="LoginButton_Click"/>
+                Width="200"/>
+
+        <!-- Footer -->
+        <TextBlock Grid.Row="5" Grid.ColumnSpan="2"
+                   Text="Your credentials are stored locally and never shared."
+                   FontSize="11"
+                   Foreground="#888"
+                   TextAlignment="Center"
+                   Margin="0 20 0 0"/>
     </Grid>
 </Window>

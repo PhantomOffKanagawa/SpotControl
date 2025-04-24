@@ -33,11 +33,18 @@ namespace SpotControl.ViewModels
 
         /* Handle Next and Previous */
         public ICommand PreviousCommand => new RelayCommand(async () => await _spotifyService.PreviousTrackAsync());
-        public ICommand PlayPauseCommand => new RelayCommand(async () => await _spotifyService.PlayPauseAsync());
+        public ICommand PlayPauseCommand => new RelayCommand(async () =>
+        {
+            await _spotifyService.PlayPauseAsync();
+            Playing = !Playing;
+        });
+
         public ICommand NextCommand => new RelayCommand(async () => await _spotifyService.NextTrackAsync());
 
         /* Track Playing */
-        public bool Playing { get; set; }
+        private bool _playing = false;
+        public bool Playing { get { return _playing; } set { _playing = value; OnPropertyChanged(nameof(PlayPauseIcon)); } }
+        public string PlayPauseIcon => Playing ? "⏸" : "⏯";
 
         /* Handle Volume */
         public int Volume { get; set; } = 50; // Bind slider
@@ -66,6 +73,7 @@ namespace SpotControl.ViewModels
         }
 
         /* Add Functionality of Shuffle/Repeat */
+        // Toggle Shuffle on/off
         public ICommand ToggleShuffleCommand => new RelayCommand(async () =>
         {
             bool newShuffle = !IsShuffle;
@@ -80,6 +88,7 @@ namespace SpotControl.ViewModels
             set { _isShuffle = value; OnPropertyChanged(); }
         }
 
+        // Cycle Between Different Repeat Commands
         public ICommand CycleRepeatCommand => new RelayCommand(async () =>
         {
             string newMode = RepeatState switch
@@ -100,7 +109,7 @@ namespace SpotControl.ViewModels
             _ => "➖"
         };
 
-
+        // Return Repeat State and Update Repeat Icon
         private string _repeatState = "off";
         public string RepeatState
         {
@@ -116,7 +125,10 @@ namespace SpotControl.ViewModels
         /* Handle Updates */
         public override async Task UpdateTrackInfoAsync()
         {
+            // Get Playback Info
             var playback = await _spotifyService.GetPlaybackInfoAsync();
+
+            // Update Depending On Playing
             if (playback?.Item is FullTrack fullTrack)
             {
                 TrackName = fullTrack.Name;
@@ -136,16 +148,20 @@ namespace SpotControl.ViewModels
             OnPropertyChanged(nameof(ArtistName));
             OnPropertyChanged(nameof(AlbumImageUrl));
 
+            // Update Track Progress
             TrackProgress = (playback?.ProgressMs ?? 0) * 100.0 / TrackDurationMs;
             OnPropertyChanged(nameof(TrackProgress));
 
+            // Update Playing
             Playing = playback?.IsPlaying ?? false;
             OnPropertyChanged(nameof(Playing));
+            OnPropertyChanged(nameof(PlayPauseIcon));
 
+            // Update Volume
             Volume = playback?.Device.VolumePercent ?? 0;
             OnPropertyChanged(nameof(Volume));
 
-
+            // Update Shuffle and Repeat
             IsShuffle = playback?.ShuffleState ?? false;
             RepeatState = playback?.RepeatState ?? "off";
             OnPropertyChanged(nameof(IsShuffle));

@@ -10,22 +10,33 @@ namespace SpotControl.Services
     /// </summary>
     public class SpotifyService : MediaController
     {
+        private readonly string _clientId;
+        private readonly string _clientSecret;
         private SpotifyClient? _spotify;
+
+        // Helper variable
         public bool IsAuthenticated => _spotify != null;
 
-        public SpotifyClient? Client => _spotify;
+        public SpotifyService(string clientId, string clientSecret)
+        {
+            _clientId = clientId;
+            _clientSecret = clientSecret;
+        }
 
         // Handle Authentication
         public async Task<bool> AuthenticateAsync()
         {
+            // Get the config
             var config = SpotifyClientConfig.CreateDefault();
 
+            // Send the login request
             var request = new LoginRequest(
                 new Uri("http://localhost:5000/callback"),
-                "d99bf089499c43549000c19e58b400e3",
+                _clientId,
                 LoginRequest.ResponseType.Code
             )
             {
+                // Define scope to include needed permissions
                 Scope = new[]
                 {
                 Scopes.UserReadPlaybackState,
@@ -34,33 +45,40 @@ namespace SpotControl.Services
             }
             };
 
+            // Start the server to listen for the callback
             var server = new EmbedIOAuthServer(new Uri("http://localhost:5000/callback"), 5000);
             var tcs = new TaskCompletionSource<bool>();
-
             await server.Start();
 
+            // Handle the authorization code received
             server.AuthorizationCodeReceived += async (sender, response) =>
             {
                 await server.Stop();
 
                 try
                 {
+                    // Exchange the authorization code for an access token
                     var token = await new OAuthClient().RequestToken(
-                        new AuthorizationCodeTokenRequest("d99bf089499c43549000c19e58b400e3", "19cecc4bae9446e7b9b4e0bf9da18d83", response.Code, new Uri("http://localhost:5000/callback"))
+                        new AuthorizationCodeTokenRequest(
+                            _clientId,
+                            _clientSecret,
+                            response.Code,
+                            new Uri("http://localhost:5000/callback"))
                     );
 
+                    // Create a new Spotify client with the access token
                     _spotify = new SpotifyClient(config.WithToken(token.AccessToken));
                     tcs.SetResult(true);
                 }
-                catch (Exception ex)
+                catch
                 {
-                    Console.WriteLine("Authentication failed: " + ex.Message);
                     tcs.SetResult(false);
                 }
             };
 
+            // Open the login URL in the default browser
             BrowserUtil.Open(request.ToUri());
-            return await tcs.Task; // Wait until authentication completes
+            return await tcs.Task;
         }
 
         // Get General Current Playing Context
