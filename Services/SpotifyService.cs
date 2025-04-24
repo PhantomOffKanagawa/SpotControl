@@ -15,6 +15,7 @@ namespace SpotControl.Services
 
         public SpotifyClient? Client => _spotify;
 
+        // Handle Authentication
         public async Task<bool> AuthenticateAsync()
         {
             var config = SpotifyClientConfig.CreateDefault();
@@ -62,16 +63,12 @@ namespace SpotControl.Services
             return await tcs.Task; // Wait until authentication completes
         }
 
-        public async Task<FullTrack?> GetCurrentTrackAsync()
-        {
-            if (_spotify == null)
-                return null;
+        // Get General Current Playing Context
+        public override async Task<CurrentlyPlayingContext?> GetPlaybackInfoAsync()
+    => await _spotify?.Player.GetCurrentPlayback();
 
-            var playback = await _spotify.Player.GetCurrentPlayback();
-            return playback?.Item as FullTrack;
-        }
-
-
+        // Handle Next, Play/Pause, and Previous Track
+        public override async Task NextTrackAsync() => await _spotify?.Player.SkipNext()!;
         public override async Task PlayPauseAsync()
         {
             if (_spotify == null)
@@ -84,20 +81,19 @@ namespace SpotControl.Services
             else
                 await _spotify.Player.ResumePlayback();
         }
-
+        public override async Task PreviousTrackAsync() => await _spotify?.Player.SkipPrevious()!;
 
         // Handle Volume Interactions
-        public async Task SetVolume(int volumePercent) => await _spotify?.Player.SetVolume(new PlayerVolumeRequest(volumePercent));
-        public override async Task NextTrackAsync() => await _spotify?.Player.SkipNext()!;
-        public override async Task PreviousTrackAsync() => await _spotify?.Player.SkipPrevious()!;
-        public async Task SeekAsync(int positionMs) => await _spotify?.Player.SeekTo(new PlayerSeekToRequest(positionMs))!;
-        public async Task<CurrentlyPlayingContext?> GetPlaybackInfoAsync()
-    => await _spotify?.Player.GetCurrentPlayback();
+        public override async Task SetVolume(int volumePercent) => await _spotify?.Player.SetVolume(new PlayerVolumeRequest(volumePercent));
 
-        public async Task SetShuffleAsync(bool isOn)
+        // Handle Syncing Seek
+        public override async Task SeekAsync(int positionMs) => await _spotify?.Player.SeekTo(new PlayerSeekToRequest(positionMs))!;
+
+        // Handle Shuffle and Repeat
+        public override async Task SetShuffleAsync(bool isOn)
             => await _spotify?.Player.SetShuffle(new PlayerShuffleRequest(isOn))!;
 
-        public async Task SetRepeatAsync(string mode) // mode: "off", "context", "track"
+        public override async Task SetRepeatAsync(string mode) // mode: "off", "context", "track"
         {
             if (_spotify == null)
                 return;
@@ -112,16 +108,6 @@ namespace SpotControl.Services
 
             await _spotify.Player.SetRepeat(new PlayerSetRepeatRequest(repeatState));
         }
-
-        // Replace the method signature and return type to resolve the CS0246 error.  
-        //public async Task<CurrentlyPlayingContext?> GetPlaybackInfoAsync()
-        //{
-        //    if (_spotify == null)
-        //        throw new InvalidOperationException("Spotify client is not initialized.");
-
-        //    var playback = await _spotify.Player.GetCurrentPlayback();
-        //    return playback;
-        //}
 
     }
 

@@ -116,21 +116,25 @@ namespace SpotControl.ViewModels
         /* Handle Updates */
         public override async Task UpdateTrackInfoAsync()
         {
-            var track = await _spotifyService.GetCurrentTrackAsync();
-            TrackName = track?.Name ?? "No track playing";
-            ArtistName = string.Join(", ", track?.Artists.Select(a => a.Name) ?? Enumerable.Empty<string>());
-            OnPropertyChanged(nameof(TrackName));
-            OnPropertyChanged(nameof(ArtistName));
-
             var playback = await _spotifyService.GetPlaybackInfoAsync();
             if (playback?.Item is FullTrack fullTrack)
             {
+                TrackName = fullTrack.Name;
+                ArtistName = string.Join(", ", fullTrack.Artists.Select(a => a.Name));
                 TrackDurationMs = fullTrack.DurationMs;
+                AlbumImageUrl = fullTrack.Album?.Images?.FirstOrDefault()?.Url ?? "";
             }
             else
             {
+                TrackName = "No track playing";
+                ArtistName = "";
                 TrackDurationMs = 0;
+                AlbumImageUrl = "";
             }
+
+            OnPropertyChanged(nameof(TrackName));
+            OnPropertyChanged(nameof(ArtistName));
+            OnPropertyChanged(nameof(AlbumImageUrl));
 
             TrackProgress = (playback?.ProgressMs ?? 0) * 100.0 / TrackDurationMs;
             OnPropertyChanged(nameof(TrackProgress));
@@ -141,8 +145,6 @@ namespace SpotControl.ViewModels
             Volume = playback?.Device.VolumePercent ?? 0;
             OnPropertyChanged(nameof(Volume));
 
-            AlbumImageUrl = track?.Album?.Images?.FirstOrDefault()?.Url ?? "";
-            OnPropertyChanged(nameof(AlbumImageUrl));
 
             IsShuffle = playback?.ShuffleState ?? false;
             RepeatState = playback?.RepeatState ?? "off";
