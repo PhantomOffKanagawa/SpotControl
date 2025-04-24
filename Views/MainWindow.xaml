@@ -1,0 +1,59 @@
+﻿<Window x:Class="SpotControl.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:SpotControl.Converters"
+        Title="Spotify Controller" Height="300" Width="500"
+        WindowStartupLocation="CenterScreen"
+        Background="#1DB954"
+        Foreground="White"
+        FontFamily="Segoe UI"
+        FontSize="14">
+
+    <Window.Resources>
+        <c:BoolToBrushConverter x:Key="BoolToBrushConverter"
+                                TrueBrush="White"
+                                FalseBrush="Transparent"/>
+    </Window.Resources>
+
+    <Grid Margin="20">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Track Info -->
+        <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0 0 0 10">
+            <TextBlock Text="{Binding TrackName}" FontSize="20" FontWeight="Bold" TextAlignment="Center"/>
+            <TextBlock Text="{Binding ArtistName}" FontSize="14" TextAlignment="Center"/>
+        </StackPanel>
+
+        <Image Grid.Row="1" Height="150" Margin="0 0 0 10"
+       Source="{Binding AlbumImageUrl}" Stretch="Uniform"/>
+
+        <!-- Playback Controls -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 0 0 10">
+            <Button Content="⏮" Width="50" Margin="5" Command="{Binding PreviousCommand}" />
+            <Button Content="⏯" Width="50" Margin="5" Command="{Binding PlayPauseCommand}" />
+            <Button Content="⏭" Width="50" Margin="5" Command="{Binding NextCommand}" />
+        </StackPanel>
+
+        <!-- Progress Bar -->
+        <Slider Grid.Row="3" Minimum="0" Maximum="100" Value="{Binding TrackProgress, Mode=TwoWay}" 
+                PreviewMouseUp="ProgressSlider_PreviewMouseUp" Margin="0 0 0 10"/>
+
+        <!-- Volume & Toggles -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+            <TextBlock Text="🔊" VerticalAlignment="Center" Margin="0 0 10 0"/>
+            <Slider Width="100" Minimum="0" Maximum="100" Value="{Binding Volume, Mode=TwoWay}"
+                    PreviewMouseUp="VolumeSlider_PreviewMouseUp"/>
+
+            <Button Content="🔀" Command="{Binding ToggleShuffleCommand}" Margin="10 0"
+                Background="{Binding IsShuffle, Converter={StaticResource BoolToBrushConverter}}" />
+            <Button Content="{Binding RepeatIcon}" Command="{Binding CycleRepeatCommand}" Margin="10 0"/>
+
+        </StackPanel>
+    </Grid>
+</Window>
