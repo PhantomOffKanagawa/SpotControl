@@ -28,7 +28,7 @@ namespace SpotControl.ViewModels
         public string ArtistName { get; set; }
 
         /* Handle Album Art */
-        private string _albumImageUrl;
+        private string _albumImageUrl = "";
         public string AlbumImageUrl { get => _albumImageUrl; set { _albumImageUrl = value; OnPropertyChanged(); } }
 
         /* Handle Next and Previous */

@@ -16,6 +16,7 @@
         <c:BoolToBrushConverter x:Key="BoolToBrushConverter"
                                 TrueBrush="#1DB954"
                                 FalseBrush="Transparent"/>
+        <c:StringToImageSourceConverter x:Key="StringToImageSourceConverter"/>
         <Style TargetType="Button">
             <Setter Property="Background" Value="#121212"/>
             <Setter Property="Foreground" Value="White"/>
@@ -45,11 +46,25 @@
         </Grid.RowDefinitions>
 
         <!-- Album Art -->
-        <Border Grid.Row="0" CornerRadius="10" BorderThickness="1" BorderBrush="#1DB954" Margin="0 0 0 10">
-            <Viewbox Stretch="Uniform">
-                <Image Source="{Binding AlbumImageUrl}" MaxHeight="400"/>
-            </Viewbox>
-        </Border>
+        <Viewbox Name="imageViewBox" Stretch="Uniform" Grid.Row="0" Margin="0 0 0 10"
+                     MaxHeight="400" >  
+          <Border CornerRadius="20"  
+                  BorderThickness="5"  
+                  BorderBrush="#1DB954"  
+                  ClipToBounds="True"  
+                  Background="#1DB954">
+                <Image Source="{Binding AlbumImageUrl, Converter={StaticResource StringToImageSourceConverter}}"
+                   Stretch="UniformToFill"
+                   SnapsToDevicePixels="True"
+                    MaxHeight="400">
+                    <Image.Clip>  
+                      <RectangleGeometry RadiusX="20"  
+                                         RadiusY="20"  
+                                         Rect="0,0,400,400"/>  
+                  </Image.Clip>  
+              </Image>  
+          </Border>  
+        </Viewbox>
 
         <!-- Track Info -->
         <StackPanel Grid.Row="1" Margin="0 10 0 10" HorizontalAlignment="Center">
