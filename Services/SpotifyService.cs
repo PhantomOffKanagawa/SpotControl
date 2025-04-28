@@ -2,6 +2,7 @@
 using SpotifyAPI.Web.Auth;
 using System;
 using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace SpotControl.Services
 {
@@ -87,7 +88,16 @@ namespace SpotControl.Services
             if (_spotify == null)
                 return null;
 
-            return await _spotify.Player.GetCurrentPlayback();
+            try
+            {
+                return await _spotify.Player.GetCurrentPlayback();
+            }
+            catch (HttpRequestException ex)
+            {
+                // Log the error or notify the user
+                Console.WriteLine($"Error fetching playback info: {ex.Message}");
+                return null;
+            }
         }
 
         // Handle Next, Play/Pause, and Previous Track
@@ -96,26 +106,50 @@ namespace SpotControl.Services
             if (_spotify == null)
                 return;
 
-            await _spotify.Player.SkipNext();
+            try
+            {
+                await _spotify.Player.SkipNext();
+            }
+            catch (HttpRequestException ex)
+            {
+                // Log the error or notify the user
+                Console.WriteLine($"Error skipping to the next track: {ex.Message}");
+            }
         }
         public override async Task PlayPauseAsync()
         {
             if (_spotify == null)
                 return;
 
-            var playback = await _spotify.Player.GetCurrentPlayback();
+            try
+            {
+                var playback = await _spotify.Player.GetCurrentPlayback();
 
-            if (playback?.IsPlaying ?? false)
-                await _spotify.Player.PausePlayback();
-            else
-                await _spotify.Player.ResumePlayback();
+                if (playback?.IsPlaying ?? false)
+                    await _spotify.Player.PausePlayback();
+                else
+                    await _spotify.Player.ResumePlayback();
+            }
+            catch (HttpRequestException ex)
+            {
+                // Log the error or notify the user
+                Console.WriteLine($"Error toggling play/pause: {ex.Message}");
+            }
         }
         public override async Task PreviousTrackAsync()
         {
             if (_spotify == null)
                 return;
 
-            await _spotify.Player.SkipPrevious();
+            try
+            {
+                await _spotify.Player.SkipPrevious();
+            }
+            catch (HttpRequestException ex)
+            {
+                // Log the error or notify the user
+                Console.WriteLine($"Error skipping to the previous track: {ex.Message}");
+            }
         }
 
         // Handle Volume Interactions
@@ -124,7 +158,15 @@ namespace SpotControl.Services
             if (_spotify == null)
                 return;
 
-            await _spotify.Player.SetVolume(new PlayerVolumeRequest(volumePercent));
+            try
+            {
+                await _spotify.Player.SetVolume(new PlayerVolumeRequest(volumePercent));
+            }
+            catch (HttpRequestException ex)
+            {
+                // Log the error or notify the user
+                Console.WriteLine($"Error setting volume: {ex.Message}");
+            }
         }
 
         // Handle Syncing Seek
@@ -133,27 +175,56 @@ namespace SpotControl.Services
             if (_spotify == null)
                 return;
 
-            await _spotify.Player.SeekTo(new PlayerSeekToRequest(positionMs));
+            try
+            {
+                await _spotify.Player.SeekTo(new PlayerSeekToRequest(positionMs));
+            }
+            catch (HttpRequestException ex)
+            {
+                // Log the error or notify the user
+                Console.WriteLine($"Error seeking playback: {ex.Message}");
+            }
         }
 
         // Handle Shuffle and Repeat
         public override async Task SetShuffleAsync(bool isOn)
-            => await _spotify?.Player.SetShuffle(new PlayerShuffleRequest(isOn))!;
+        {
+            if (_spotify == null)
+                return;
+
+            try
+            {
+                await _spotify.Player.SetShuffle(new PlayerShuffleRequest(isOn));
+            }
+            catch (HttpRequestException ex)
+            {
+                // Log the error or notify the user
+                Console.WriteLine($"Error setting shuffle: {ex.Message}");
+            }
+        }
 
         public override async Task SetRepeatAsync(string mode) // mode: "off", "context", "track"
         {
             if (_spotify == null)
                 return;
 
-            PlayerSetRepeatRequest.State repeatState = mode.ToLower() switch
+            try
             {
-                "track" => PlayerSetRepeatRequest.State.Track,
-                "context" => PlayerSetRepeatRequest.State.Context,
-                "off" => PlayerSetRepeatRequest.State.Off,
-                _ => throw new ArgumentException($"Invalid repeat mode: {mode}")
-            };
+                PlayerSetRepeatRequest.State repeatState = mode.ToLower() switch
+                {
+                    "track" => PlayerSetRepeatRequest.State.Track,
+                    "context" => PlayerSetRepeatRequest.State.Context,
+                    "off" => PlayerSetRepeatRequest.State.Off,
+                    _ => throw new ArgumentException($"Invalid repeat mode: {mode}")
+                };
 
-            await _spotify.Player.SetRepeat(new PlayerSetRepeatRequest(repeatState));
+                await _spotify.Player.SetRepeat(new PlayerSetRepeatRequest(repeatState));
+            }
+            catch (HttpRequestException ex)
+            {
+                // Log the error or notify the user
+                Console.WriteLine($"Error setting repeat mode: {ex.Message}");
+            }
         }
 
     }
