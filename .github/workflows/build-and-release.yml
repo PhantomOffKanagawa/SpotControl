@@ -18,14 +18,13 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '7.0.x'
+        dotnet-version: '8.0.x'
 
-    - name: Install .NET Runtime Pack
-      run: |
-        dotnet workload install
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
 
-    - name: Restore NuGet Dependencies
-      run: nuget restore SpotControl.sln
+    - name: Restore dependencies
+      run: dotnet restore SpotControl.sln --runtime win-x64
 
     - name: Build SpotControl (Release)
       run: dotnet build SpotControl.sln --configuration Release
