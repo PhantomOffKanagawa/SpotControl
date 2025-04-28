@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using SpotControl.Services;
 using SpotifyAPI.Web;
+using Swan;
 
 namespace SpotControl.ViewModels
 {
@@ -16,6 +17,10 @@ namespace SpotControl.ViewModels
 
         public PlayerViewModel(SpotifyService spotifyService)
         {
+            // Set defaults
+            TrackName = "";
+            ArtistName = "";
+
             // Initialize service
             _spotifyService = spotifyService;
 
@@ -24,44 +29,60 @@ namespace SpotControl.ViewModels
         }
 
         /* Handle Track Name and Artist Name */
-        public string TrackName { get; set; }
-        public string ArtistName { get; set; }
+        public override string TrackName { get; set; }
+        public override string ArtistName { get; set; }
 
         /* Handle Album Art */
         private string _albumImageUrl = "";
-        public string AlbumImageUrl { get => _albumImageUrl; set { _albumImageUrl = value; OnPropertyChanged(); } }
+        public override string AlbumImageUrl
+        {
+            get => _albumImageUrl;
+            set { _albumImageUrl = value; OnPropertyChanged(); }
+        }
 
         /* Handle Next and Previous */
-        public ICommand PreviousCommand => new RelayCommand(async () => await _spotifyService.PreviousTrackAsync());
-        public ICommand PlayPauseCommand => new RelayCommand(async () =>
+        public override ICommand PreviousCommand => new RelayCommand(async () => await _spotifyService.PreviousTrackAsync());
+        public override ICommand PlayPauseCommand => new RelayCommand(async () =>
         {
             await _spotifyService.PlayPauseAsync();
             Playing = !Playing;
         });
 
-        public ICommand NextCommand => new RelayCommand(async () => await _spotifyService.NextTrackAsync());
+        public override ICommand NextCommand => new RelayCommand(async () => await _spotifyService.NextTrackAsync());
 
         /* Track Playing */
         private bool _playing = false;
-        public bool Playing { get { return _playing; } set { _playing = value; OnPropertyChanged(nameof(PlayPauseIcon)); } }
+        public bool Playing
+        {
+            get { return _playing; }
+            set { _playing = value; OnPropertyChanged(nameof(PlayPauseIcon)); }
+        }
         public string PlayPauseIcon => Playing ? "⏸" : "⏯";
 
         /* Handle Volume */
-        public int Volume { get; set; } = 50; // Bind slider
-        public ICommand SetVolume => new RelayCommand(async () => await _spotifyService.SetVolume(Volume));
+        private int _volume = 50;
+        public override int Volume
+        {
+            get => _volume;
+            set { _volume = value; OnPropertyChanged(); }
+        }
+        public override ICommand SetVolume => new RelayCommand(async () => await _spotifyService.SetVolume(Volume));
 
         /* Handle Track Progress */
-        public double TrackProgress { get; set; } = 0; // Bind progress bar
-        public int TrackDurationMs = 0;
-        public ICommand SeekToCurrentPosition => new RelayCommand(async () => await _spotifyService.SeekAsync((int)(TrackProgress / 100 * TrackDurationMs)));
+        private double _trackProgress = 0;
+        public override double TrackProgress
+        {
+            get => _trackProgress;
+            set { _trackProgress = value; OnPropertyChanged(); }
+        }
+        public override int TrackDurationMs { get; set; }
+        public override ICommand SeekToCurrentPosition => new RelayCommand(async () => await _spotifyService.SeekAsync((int)(TrackProgress / 100 * TrackDurationMs)));
 
         // Make the slider move even when not actively updated
-        // This is looped in a thread at the bottom
         private void smoothMove()
         {
             if (TrackDurationMs != 0 && Playing)
             {
-
                 TrackProgress += ((float)UPDATE_SEEK_MS / (float)TrackDurationMs) * 100.0;
                 if (TrackProgress > 100)
                 {
@@ -73,8 +94,7 @@ namespace SpotControl.ViewModels
         }
 
         /* Add Functionality of Shuffle/Repeat */
-        // Toggle Shuffle on/off
-        public ICommand ToggleShuffleCommand => new RelayCommand(async () =>
+        public override ICommand ToggleShuffleCommand => new RelayCommand(async () =>
         {
             bool newShuffle = !IsShuffle;
             IsShuffle = newShuffle;
@@ -82,14 +102,13 @@ namespace SpotControl.ViewModels
         });
 
         private bool _isShuffle;
-        public bool IsShuffle
+        public override bool IsShuffle
         {
             get => _isShuffle;
             set { _isShuffle = value; OnPropertyChanged(); }
         }
 
-        // Cycle Between Different Repeat Commands
-        public ICommand CycleRepeatCommand => new RelayCommand(async () =>
+        public override ICommand CycleRepeatCommand => new RelayCommand(async () =>
         {
             string newMode = RepeatState switch
             {
@@ -109,9 +128,8 @@ namespace SpotControl.ViewModels
             _ => "➖"
         };
 
-        // Return Repeat State and Update Repeat Icon
         private string _repeatState = "off";
-        public string RepeatState
+        public override string RepeatState
         {
             get => _repeatState;
             set
@@ -125,10 +143,8 @@ namespace SpotControl.ViewModels
         /* Handle Updates */
         public override async Task UpdateTrackInfoAsync()
         {
-            // Get Playback Info
             var playback = await _spotifyService.GetPlaybackInfoAsync();
 
-            // Update Depending On Playing
             if (playback?.Item is FullTrack fullTrack)
             {
                 TrackName = fullTrack.Name;
@@ -148,30 +164,24 @@ namespace SpotControl.ViewModels
             OnPropertyChanged(nameof(ArtistName));
             OnPropertyChanged(nameof(AlbumImageUrl));
 
-            // Update Track Progress
             TrackProgress = (playback?.ProgressMs ?? 0) * 100.0 / TrackDurationMs;
             OnPropertyChanged(nameof(TrackProgress));
 
-            // Update Playing
             Playing = playback?.IsPlaying ?? false;
             OnPropertyChanged(nameof(Playing));
             OnPropertyChanged(nameof(PlayPauseIcon));
 
-            // Update Volume
             Volume = playback?.Device.VolumePercent ?? 0;
             OnPropertyChanged(nameof(Volume));
 
-            // Update Shuffle and Repeat
             IsShuffle = playback?.ShuffleState ?? false;
             RepeatState = playback?.RepeatState ?? "off";
             OnPropertyChanged(nameof(IsShuffle));
             OnPropertyChanged(nameof(RepeatState));
         }
 
-        // Spin off Updates into Polling Thread
-
-        private CancellationTokenSource _ctsUpdates;
-        private CancellationTokenSource _ctsSeeking;
+        private CancellationTokenSource? _ctsUpdates;
+        private CancellationTokenSource? _ctsSeeking;
 
         public void StartBackgroundPolling()
         {
@@ -202,5 +212,4 @@ namespace SpotControl.ViewModels
             _ctsSeeking?.Cancel();
         }
     }
-
 }

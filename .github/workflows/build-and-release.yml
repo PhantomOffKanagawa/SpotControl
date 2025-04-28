@@ -30,11 +30,11 @@ jobs:
       run: dotnet build SpotControl.sln --configuration Release
 
     - name: Publish normal expanded version
-      run: dotnet publish SpotControl/SpotControl.csproj -c Release -o SpotControl-publish-expanded --no-restore
+      run: dotnet publish SpotControl.csproj -c Release -o SpotControl-publish-expanded --no-restore
 
     - name: Publish (single file)
       run: |
-        dotnet publish SpotControl/SpotControl.csproj -c Release -o ./SpotControl-publish-single \
+        dotnet publish SpotControl.csproj -c Release -o ./SpotControl-publish-single \
           -p:PublishSingleFile=true \
           -p:RuntimeIdentifier=win-x64 \
           -p:SelfContained=true \

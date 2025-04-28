@@ -10,31 +10,31 @@ namespace SpotControl.ViewModels
     public abstract class MediaViewModel : BaseViewModel
     {
         // Properties
-        public string TrackName;
-        public string ArtistName;
-        public string AlbumImageURL;
+        public abstract string TrackName { get; set; }
+        public abstract string ArtistName { get; set; }
+        public abstract string AlbumImageUrl { get; set; }
 
         // Commands
-        public ICommand PreviousCommand;
-        public ICommand PlayPauseCommand;
-        public ICommand NextCommand;
+        public abstract ICommand PreviousCommand { get; }
+        public abstract ICommand PlayPauseCommand { get; }
+        public abstract ICommand NextCommand { get; }
+
+        // Progress
+        public abstract double TrackProgress { get; set; }
+        public abstract int TrackDurationMs { get; set; }
+        public abstract ICommand SeekToCurrentPosition { get; }
 
         // Volume
-        public int Volume;
-        public ICommand SetVolume;
+        public abstract int Volume { get; set; }
+        public abstract ICommand SetVolume { get; }
 
-        // Track Progress
-        public double TrackProgress;
-        public int TrackDurationMs;
-        public ICommand SeekToCurrentPosition;
+        // Shuffle / Repeat
+        public abstract ICommand ToggleShuffleCommand { get; }
+        public abstract ICommand CycleRepeatCommand { get; }
+        public abstract string RepeatState { get; set; }
+        public abstract bool IsShuffle { get; set; }
 
-        // Shuffle & Repeat
-        public ICommand ToggleShuffleCommand;
-        public bool IsShuffle;
-        public ICommand CycleRepeatCommand;
-        public string RepeatIcon;
-
-        // Update Method
+        // Helper for INotifyPropertyChanged
         public abstract Task UpdateTrackInfoAsync();
     }
 }
