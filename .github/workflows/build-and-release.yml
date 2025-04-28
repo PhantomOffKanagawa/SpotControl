@@ -34,12 +34,7 @@ jobs:
 
     - name: Publish (single file)
       run: |
-        dotnet publish SpotControl.csproj -c Release -o ./SpotControl-publish-single \
-          -p:PublishSingleFile=true \
-          -p:RuntimeIdentifier=win-x64 \
-          -p:SelfContained=true \
-          -p:IncludeNativeLibrariesForSelfExtract=true \
-          --no-restore
+        dotnet publish SpotControl.csproj -c Release -o ./SpotControl-publish-single -p:PublishSingleFile=true -p:RuntimeIdentifier=win-x64 -p:SelfContained=true -p:IncludeNativeLibrariesForSelfExtract=true --no-restore
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2

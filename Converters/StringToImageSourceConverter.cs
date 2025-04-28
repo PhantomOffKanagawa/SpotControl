@@ -21,10 +21,10 @@ namespace SpotControl.Converters
                 catch
                 {
                     // Handle invalid URL or other issues gracefully  
-                    return null;
+                    return System.Windows.DependencyProperty.UnsetValue;
                 }
             }
-            return null;
+            return System.Windows.DependencyProperty.UnsetValue;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

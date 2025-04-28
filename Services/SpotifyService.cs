@@ -83,10 +83,21 @@ namespace SpotControl.Services
 
         // Get General Current Playing Context
         public override async Task<CurrentlyPlayingContext?> GetPlaybackInfoAsync()
-    => await _spotify?.Player.GetCurrentPlayback();
+        {
+            if (_spotify == null)
+                return null;
+
+            return await _spotify.Player.GetCurrentPlayback();
+        }
 
         // Handle Next, Play/Pause, and Previous Track
-        public override async Task NextTrackAsync() => await _spotify?.Player.SkipNext()!;
+        public override async Task NextTrackAsync()
+        {
+            if (_spotify == null)
+                return;
+
+            await _spotify.Player.SkipNext();
+        }
         public override async Task PlayPauseAsync()
         {
             if (_spotify == null)
@@ -99,13 +110,31 @@ namespace SpotControl.Services
             else
                 await _spotify.Player.ResumePlayback();
         }
-        public override async Task PreviousTrackAsync() => await _spotify?.Player.SkipPrevious()!;
+        public override async Task PreviousTrackAsync()
+        {
+            if (_spotify == null)
+                return;
+
+            await _spotify.Player.SkipPrevious();
+        }
 
         // Handle Volume Interactions
-        public override async Task SetVolume(int volumePercent) => await _spotify?.Player.SetVolume(new PlayerVolumeRequest(volumePercent));
+        public override async Task SetVolume(int volumePercent)
+        {
+            if (_spotify == null)
+                return;
+
+            await _spotify.Player.SetVolume(new PlayerVolumeRequest(volumePercent));
+        }
 
         // Handle Syncing Seek
-        public override async Task SeekAsync(int positionMs) => await _spotify?.Player.SeekTo(new PlayerSeekToRequest(positionMs))!;
+        public override async Task SeekAsync(int positionMs)
+        {
+            if (_spotify == null)
+                return;
+
+            await _spotify.Player.SeekTo(new PlayerSeekToRequest(positionMs));
+        }
 
         // Handle Shuffle and Repeat
         public override async Task SetShuffleAsync(bool isOn)
