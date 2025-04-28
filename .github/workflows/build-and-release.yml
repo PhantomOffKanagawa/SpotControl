@@ -1,0 +1,56 @@
+name: Manual Build and Release SpotControl
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag for release (e.g., v1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build SpotControl (Release)
+      run: dotnet build SpotControl.sln --configuration Release
+
+    - name: Publish normal expanded version
+      run: |
+        dotnet publish SpotControl/SpotControl.csproj -c Release -o publish-expanded
+
+    - name: Publish single-file version
+      run: |
+        dotnet publish SpotControl/SpotControl.csproj -c Release -o publish-singlefile -p:PublishSingleFile=true -p:SelfContained=true -r win-x64
+
+    - name: Zip expanded version
+      run: Compress-Archive -Path publish-expanded\* -DestinationPath SpotControl-expanded.zip
+
+    - name: Zip single-file version
+      run: Compress-Archive -Path publish-singlefile\* -DestinationPath SpotControl-singlefile.zip
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ inputs.version }}
+        name: SpotControl Release ${{ inputs.version }}
+        files: |
+          SpotControl-expanded.zip
+          SpotControl-singlefile.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

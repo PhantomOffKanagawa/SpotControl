@@ -14,6 +14,18 @@ SpotControl is a modern WPF desktop application for controlling Spotify playback
 - **Inheritance and class design** for extensibility
 - **Data binding** for dynamic UI updates
 
+## Getting Started
+
+> Requires .NET 6.0 or later, Spotify Premium, and a [Spotify Developer app](https://developer.spotify.com/).
+
+1. **Clone the repository**
+2. **Open in Visual Studio 2022+**
+3. **Restore NuGet packages**
+4. **Run the application**
+5. **Login to Spotify** when prompted
+
+> Or download the latest release from the [Releases](https://www.github.com/PhantomOffKanagawa/SpotControl/releases) page.
+
 ## Features
 
 ### Low-bar (Minimum)
@@ -31,11 +43,11 @@ SpotControl is a modern WPF desktop application for controlling Spotify playback
 
 ### High-bar (Stretch Goal)
 - **Playback art** (album cover)
-- **Search** for songs/playlists and play them
-- **Display playlists** and allow selection
-- **Keyboard Hotkey** media key integration
-- **System tray minimization** with pop-up notifications
-- **Theme switching** (light/dark mode)
+- ~~**Search** for songs/playlists and play them~~
+- ~~**Display playlists** and allow selection~~
+- ~~**Keyboard Hotkey** media key integration~~
+- ~~**System tray minimization** with pop-up notifications~~
+- ~~**Theme switching** (light/dark mode)~~
 
 ## Architecture & Concepts
 
@@ -69,18 +81,9 @@ SpotControl is a modern WPF desktop application for controlling Spotify playback
 ### Exception Handling
 - All network and API calls are wrapped in try/catch blocks to handle errors gracefully and inform the user.
 
-## Getting Started
-
-1. **Clone the repository**
-2. **Open in Visual Studio 2022+**
-3. **Restore NuGet packages**
-4. **Run the application**
-5. **Login to Spotify** when prompted
-
 ## Screenshots
 
-![SpotControl UI](screenshot.png) <!-- Add a screenshot if available -->
-
+![SpotControl UI](screenshot.png)
 
 ---
 
