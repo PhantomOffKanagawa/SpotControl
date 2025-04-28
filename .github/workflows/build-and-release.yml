@@ -1,12 +1,11 @@
-name: Manual Build and Release SpotControl
+name: Build and Release
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag for release (e.g., v1.0.0)'
+        description: "Version for the release"
         required: true
-        type: string
 
 jobs:
   build:
@@ -25,24 +24,22 @@ jobs:
       uses: microsoft/setup-msbuild@v2
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore SpotControl.sln
 
     - name: Build SpotControl (Release)
       run: dotnet build SpotControl.sln --configuration Release
 
     - name: Publish normal expanded version
+      run: dotnet publish SpotControl/SpotControl.csproj -c Release -o SpotControl-publish-expanded --no-restore
+
+    - name: Publish (single file)
       run: |
-        dotnet publish SpotControl/SpotControl.csproj -c Release -o publish-expanded
-
-    - name: Publish single-file version
-      run: |
-        dotnet publish SpotControl/SpotControl.csproj -c Release -o publish-singlefile -p:PublishSingleFile=true -p:SelfContained=true -r win-x64
-
-    - name: Zip expanded version
-      run: Compress-Archive -Path publish-expanded\* -DestinationPath SpotControl-expanded.zip
-
-    - name: Zip single-file version
-      run: Compress-Archive -Path publish-singlefile\* -DestinationPath SpotControl-singlefile.zip
+        dotnet publish SpotControl/SpotControl.csproj -c Release -o ./SpotControl-publish-single \
+          -p:PublishSingleFile=true \
+          -p:RuntimeIdentifier=win-x64 \
+          -p:SelfContained=true \
+          -p:IncludeNativeLibrariesForSelfExtract=true \
+          --no-restore
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
@@ -50,7 +47,7 @@ jobs:
         tag_name: ${{ inputs.version }}
         name: SpotControl Release ${{ inputs.version }}
         files: |
-          SpotControl-expanded.zip
-          SpotControl-singlefile.zip
+          SpotControl-publish-expanded/**
+          SpotControl-publish-single/**
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
